@@ -1,0 +1,26 @@
+:host {
+  display: block; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+  padding: 16px 16px 12px; margin-top: 16px;
+}
+.head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.left { display: flex; align-items: center; gap: 12px; }
+.label { font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: #475569; font-weight: 600; }
+.now { display: flex; align-items: baseline; gap: 10px; }
+.value { font-weight: 700; color: #0f172a; font-variant-numeric: tabular-nums; }
+
+input[type=range] { width: 100%; margin: 0; height: 28px; accent-color: #4f46e5; cursor: pointer; }
+input[type=range]:disabled { cursor: not-allowed; }
+
+/* Tick marks sit under the thumb's travel range (thumb is about 16px wide). */
+.ticks { display: flex; justify-content: space-between; padding: 0 8px; margin-top: -2px; }
+.tick { width: 1px; height: 6px; background: #cbd5e1; }
+.tick.major { height: 10px; background: #94a3b8; }
+/* Under the scale, one segment per stage, as wide as the stage is long. Same side padding as the ticks. */
+.bands { display: flex; padding: 0 8px; margin-top: 4px; gap: 2px; }
+.band {
+  flex: 1 1 0; min-width: 0; text-align: center; font-size: 12px; font-weight: 700; padding: 2px 0; border-radius: 4px;
+  background: var(--stage-soft); color: var(--stage-soft-text); overflow: hidden; white-space: nowrap;
+}
+.band.active { background: var(--stage); color: #fff; }
+.band.skipped { display: none; }
+.ends { display: flex; justify-content: space-between; padding: 0 4px; margin-top: 2px; font-size: 12px; color: #64748b; }

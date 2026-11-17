@@ -1,0 +1,49 @@
+/* The panel is positioned over the grid cell, so its content never makes the row taller:
+   the row is exactly as tall as the cube panel, and a long body scrolls inside. */
+:host { display: block; position: relative; min-width: 0; }
+.panel {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;
+}
+.body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+// Pinned to the bottom. Its buttons stack: Back / Next on one row, Finish underneath.
+.footer { flex: none; margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+h2 { margin: 16px 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: #475569; }
+h2:first-child { margin-top: 0; }
+.row { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+.count { color: #64748b; font-size: 13px; }
+.ok { color: #15803d; margin: 0; }
+.errors { margin: 0; padding-left: 20px; color: #b91c1c; }
+
+.solution-title { font-size: 22px; text-transform: none; letter-spacing: 0; color: #0f172a; margin: 0 0 16px; }
+.methods { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.total { margin: 20px 0 10px; color: #475569; }
+.total strong { color: #0f172a; font-size: 18px; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Each stage has its own color, set inline from shared/stage-colors.ts; a list without stages uses these defaults. */
+.stage {
+  --stage: #4f46e5; --stage-dark: #312e81; --stage-soft: #e0e7ff; --stage-soft-text: #3730a3;
+}
+
+.stage + .stage { margin-top: 14px; }
+.stage-title {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin: 0 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--stage-soft);
+  font-size: 15px; color: #475569;
+}
+.stage-name { font-weight: 800; color: var(--stage); letter-spacing: .02em; }
+.stage-count { font-size: 13px; font-variant-numeric: tabular-nums; }
+.stage.active .stage-title { border-bottom-color: var(--stage); }
+
+// The chips are labels from the shared UI; this only gives short moves a common width.
+.chip { min-width: 42px; }
+.steps > li { display: flex; }
+
+
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* One column: no neighbour to match, so the panel takes the height of its content. */
+@media (max-width: 800px) { .panel { position: static; } }

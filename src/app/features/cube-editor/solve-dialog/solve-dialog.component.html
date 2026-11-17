@@ -1,0 +1,17 @@
+@if (session.isSolving()) {
+  <div class="backdrop">
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="solve-dialog-title" aria-busy="true">
+      <div class="spinner" aria-hidden="true"></div>
+      <h2 id="solve-dialog-title">Generating solution&hellip;</h2>
+      <p>{{ detail() }}</p>
+    </div>
+  </div>
+} @else if (session.error() !== null) {
+  <div class="backdrop">
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="solve-dialog-title">
+      <h2 id="solve-dialog-title">Couldn't generate a solution</h2>
+      <p>{{ session.error() }}</p>
+      <app-ui-element class="close" label="Close" (click)="session.dismissError()" />
+    </div>
+  </div>
+}

@@ -1,0 +1,8 @@
+<div class="stage" #stage>
+  <canvas #canvas aria-label="3D Rubik's cube"></canvas>
+</div>
+<div class="views" role="group" aria-label="Camera views">
+  @for (v of views; track v.face) {
+    <app-ui-element [label]="v.label" size="sm" shape="pill" variant="outline" color="slate" (click)="goTo(v.face)" />
+  }
+</div>

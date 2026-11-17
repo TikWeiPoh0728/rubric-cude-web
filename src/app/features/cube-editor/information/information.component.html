@@ -1,0 +1,104 @@
+<div class="panel">
+  <div class="body">
+    @if (session.isEditing()) {
+      <h2>Unfolded</h2>
+      <app-net-2d />
+
+      <h2>Colors</h2>
+      <app-palette />
+
+      <div class="row">
+        <app-ui-element class="reset" label="Reset" variant="outline" color="red" (click)="state.reset()" />
+        <span class="count">{{ filled() }} / 54 filled</span>
+      </div>
+
+      <h2>Problems</h2>
+      @if (state.errors().length === 0) {
+        <p class="ok">No problems found.</p>
+      } @else {
+        <ul class="errors">
+          @for (e of state.errors(); track $index) {
+            <li>{{ describe(e) }}</li>
+          }
+        </ul>
+      }
+    } @else {
+      <h2 class="solution-title">Solution</h2>
+      <div class="methods" role="radiogroup" aria-label="Solving method">
+        @for (m of methods; track m.id) {
+          <app-ui-element
+            class="method"
+            [label]="m.label"
+            [ariaRole]="'radio'"
+            variant="outline"
+            [color]="session.method() === m.id ? 'indigo' : 'slate'"
+            [selected]="session.method() === m.id"
+            [disabled]="session.hasStarted()"
+            (click)="session.selectMethod(m.id)"
+          />
+        }
+      </div>
+
+      @if (session.isSolved()) {
+        @if (playback.total() === 0) {
+          <p class="total">The cube is already solved: <strong>0</strong> steps.</p>
+        } @else {
+          <p class="total">Total steps: <strong>{{ playback.total() }}</strong></p>
+
+          <!-- One section per stage (Cross, F2L, OLL, PLL), or a single untitled list for a method without stages. -->
+          @for (section of sections(); track section.id) {
+            <section
+              class="stage"
+              [attr.data-stage]="section.id"
+              [style]="stageVars(section.id)"
+              [class.active]="section.id === playback.currentStage()?.id"
+            >
+              @if (section.label) {
+                <h3 class="stage-title">
+                  <span class="stage-name">{{ section.label }}</span>
+                  <span class="stage-count">{{ countText(section.count) }}</span>
+                </h3>
+              }
+              @if (section.count > 0) {
+                <ol class="steps" [attr.aria-label]="(section.label ?? 'Solution') + ' steps'">
+                  @for (move of section.moves; track $index) {
+                    <li>
+                      <!-- Played moves are soft in the stage's color, the move just played is solid, the rest are grey. -->
+                      <app-ui-element
+                        class="chip"
+                        kind="label"
+                        size="sm"
+                        [label]="move"
+                        [variant]="section.first + $index === playback.step() - 1 ? 'solid' : 'soft'"
+                        [color]="section.first + $index < playback.step() ? section.color : 'slate'"
+                        [class.done]="section.first + $index < playback.step()"
+                        [class.current]="section.first + $index === playback.step() - 1"
+                        [attr.aria-current]="section.first + $index === playback.step() - 1 ? 'step' : null"
+                      />
+                    </li>
+                  }
+                </ol>
+              }
+            </section>
+          }
+        }
+      }
+    }
+  </div>
+
+  <!-- Pinned to the bottom of the panel. Start before solving, Back / Next while stepping through. -->
+  @if (!session.isEditing()) {
+    <div class="footer">
+      @if (session.isSolved()) {
+        <div class="pager">
+          <app-ui-element label="Back" icon="back" size="lg" [block]="true" [disabled]="!playback.canBack()" (click)="playback.back()" />
+          <app-ui-element label="Next" icon="next" [iconPosition]="'end'" size="lg" [block]="true" [disabled]="!playback.canNext()" (click)="playback.next()" />
+        </div>
+        <!-- Done with the solution: back to editing. -->
+        <app-ui-element label="Finish" icon="check" color="green" size="lg" [block]="true" (click)="session.finish()" />
+      } @else if (!session.hasStarted()) {
+        <app-ui-element label="Start" color="green" size="lg" [block]="true" [disabled]="!session.canStart()" (click)="session.start()" />
+      }
+    </div>
+  }
+</div>

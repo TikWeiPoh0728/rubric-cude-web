@@ -1,0 +1,25 @@
+<div class="palette" role="radiogroup" aria-label="Color palette">
+  @for (c of colors; track c) {
+    <button
+      type="button"
+      role="radio"
+      class="swatch"
+      [class.active]="state.activeColor() === c"
+      [class.unavailable]="isUnavailable(c)"
+      [style.background-color]="fill(c)"
+      [attr.aria-checked]="state.activeColor() === c"
+      [attr.aria-label]="name(c)"
+      [title]="name(c)"
+      (click)="state.setActiveColor(c)"
+    ></button>
+  }
+</div>
+<p class="hint">
+  @if (state.focusSticker() === null) {
+    Pick a color, then click stickers to paint them.
+  } @else if (state.hovered() !== null) {
+    Greyed colors don't fit the sticker you're pointing at. Other stickers may still take them.
+  } @else {
+    Greyed colors don't fit the selected empty sticker. Other stickers may still take them.
+  }
+</p>

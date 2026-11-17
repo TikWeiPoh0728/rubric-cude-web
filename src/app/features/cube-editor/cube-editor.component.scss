@@ -1,0 +1,14 @@
+:host { display: block; max-width: 1100px; margin: 0 auto; padding: 16px; color: #0f172a; }
+header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+h1 { margin: 0; font-size: 28px; }
+header p { margin: 0; color: #64748b; }
+/* Both columns stretch to the row height, which the cube panel alone decides. */
+main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; }
+
+/* Fixed height, so the cube does not jump when the button appears or disappears. */
+.action-slot { display: flex; justify-content: center; align-items: center; min-height: 44px; margin-top: 12px; }
+// Save and Edit share one width, so the button does not change size when it changes label.
+.action { min-width: 120px; }
+
+@media (max-width: 800px) { main { grid-template-columns: 1fr; } }

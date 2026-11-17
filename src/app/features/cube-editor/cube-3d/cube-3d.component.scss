@@ -1,0 +1,5 @@
+:host { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.stage { position: relative; width: 100%; aspect-ratio: 1; min-height: 280px; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+canvas:active { cursor: grabbing; }
+.views { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }

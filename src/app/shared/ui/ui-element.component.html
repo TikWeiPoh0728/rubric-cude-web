@@ -1,0 +1,42 @@
+<ng-template #content>
+  @if (iconData(); as icon) {
+    @if (iconPosition() === 'start' || iconOnly()) {
+      <ng-container *ngTemplateOutlet="svg; context: { $implicit: icon }" />
+    }
+  }
+  @if (!iconOnly()) {
+    <span class="text">{{ label() }}</span>
+  }
+  @if (iconData(); as icon) {
+    @if (iconPosition() === 'end' && !iconOnly()) {
+      <ng-container *ngTemplateOutlet="svg; context: { $implicit: icon }" />
+    }
+  }
+</ng-template>
+
+<ng-template #svg let-icon>
+  <svg class="icon" [class.icon--fill]="icon.style === 'fill'" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    @for (d of icon.paths; track d) {
+      <path [attr.d]="d" />
+    }
+  </svg>
+</ng-template>
+
+@if (kind() === 'button') {
+  <button
+    type="button"
+    [class]="classes()"
+    [disabled]="disabled()"
+    [attr.role]="ariaRole()"
+    [attr.aria-label]="accessibleName()"
+    [attr.aria-checked]="checked()"
+    [attr.aria-pressed]="pressed()"
+    [attr.title]="tooltip()"
+  >
+    <ng-container *ngTemplateOutlet="content" />
+  </button>
+} @else {
+  <span [class]="classes()" [attr.aria-label]="accessibleName()" [attr.title]="tooltip()">
+    <ng-container *ngTemplateOutlet="content" />
+  </span>
+}

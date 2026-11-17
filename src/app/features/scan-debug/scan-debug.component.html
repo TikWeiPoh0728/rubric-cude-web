@@ -1,0 +1,247 @@
+<header class="bar">
+  <h1>Scan debug</h1>
+  <label class="file">
+    <input type="file" accept="image/*" (change)="onFile($event)" />
+    <span>Upload photo</span>
+  </label>
+  <span class="status" [class.bad]="cvState() !== 'loading' && cvState() !== 'ready'">
+    @switch (cvState()) {
+      @case ('loading') { Loading OpenCV… }
+      @case ('ready') { OpenCV ready }
+      @default { {{ cvState() }} }
+    }
+  </span>
+  @if (photo(); as p) {
+    <span class="muted">{{ p.name }}</span>
+  }
+  @if (busy()) {
+    <span class="muted">running…</span>
+  }
+  @if (result(); as r) {
+    <span class="muted">
+      {{ r.width }}×{{ r.height }} ·
+      @for (t of r.timings | keyvalue; track t.key) { {{ t.key }} {{ t.value }}ms · }
+    </span>
+  }
+</header>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<div class="layout">
+  <aside class="controls">
+    <div class="row">
+      <label for="mode">Mode</label>
+      <select id="mode" aria-label="Mode" [value]="options().preprocess.mode" (change)="setMode($any($event.target).value)">
+        <option value="adaptive">Adaptive threshold</option>
+        <option value="canny">Canny</option>
+      </select>
+    </div>
+    @for (f of fields; track f.group + f.key) {
+      @if (f.key === 'maxWidth' || f.key === 'minAreaFrac' || f.key === 'minSquares' || f.key === 'inner') {
+        <h3>{{ f.group }}</h3>
+      }
+      <div class="row">
+        <label [for]="f.key">{{ f.label }}</label>
+        <input
+          type="number"
+          [id]="f.key"
+          [attr.aria-label]="f.label"
+          [step]="f.step"
+          [min]="f.min ?? null"
+          [max]="f.max ?? null"
+          [value]="value(f)"
+          (input)="setValue(f, $any($event.target).value)"
+        />
+      </div>
+    }
+    <div class="buttons">
+      <button type="button" (click)="resetOptions()">Reset</button>
+      <button type="button" (click)="copyOptions()">Copy JSON</button>
+    </div>
+  </aside>
+
+  <main>
+    @if (result(); as r) {
+      <section class="steps">
+        <figure>
+          <figcaption>Input</figcaption>
+          <canvas #inputCanvas></canvas>
+        </figure>
+        <figure>
+          <figcaption>Threshold / edges (dilated)</figcaption>
+          <canvas #maskCanvas></canvas>
+        </figure>
+        <figure>
+          <figcaption>Contours <span class="muted">{{ contourSummary() }}</span></figcaption>
+          <canvas
+            #contourCanvas
+            (mousemove)="onContourHover($event)"
+            (mouseleave)="hoveredContour.set(null)"
+          ></canvas>
+          <small>{{ hoveredInfo() ?? 'Hover a contour to see why it was kept or rejected.' }}</small>
+        </figure>
+        <figure>
+          <figcaption>
+            Grid fit
+            @if (r.grid.ok) {
+              <span class="muted">pitch {{ r.grid.pitch.u.toFixed(1) }} × {{ r.grid.pitch.v.toFixed(1) }}px</span>
+            }
+          </figcaption>
+          <canvas #gridCanvas></canvas>
+          <small>
+            @if (r.grid.ok) {
+              {{ r.grid.candidates.length }} tied window(s); chosen score
+              {{ r.grid.candidates[0].score.toFixed(2) }} (edge {{ r.grid.candidates[0].edge.toFixed(2) }},
+              central {{ r.grid.candidates[0].centrality.toFixed(2) }}).
+            } @else {
+              <b class="bad">No grid: {{ r.grid.reason }}</b>
+            }
+            <br />
+            @for (s of statusColors; track s[0]) {
+              <span class="key" [style.border-color]="s[1]">{{ s[0] }}</span>
+            }
+          </small>
+        </figure>
+        <figure>
+          <figcaption>Warped face</figcaption>
+          @if (r.debug?.warped) {
+            <canvas #warpCanvas></canvas>
+          } @else {
+            <div class="empty">no grid</div>
+          }
+        </figure>
+        <figure>
+          <figcaption>Samples</figcaption>
+          @if (cells(); as c) {
+            <div class="cells">
+              @for (cell of c.list; track cell.index) {
+                <div
+                  class="cell"
+                  [class.wrong]="cell.predicted && cell.expected && cell.predicted.face !== cell.expected"
+                >
+                  <div class="swatch" [style.background]="cell.css">{{ cell.index }}</div>
+                  <code>L {{ cell.lab.L.toFixed(0) }} a {{ cell.lab.a.toFixed(0) }} b {{ cell.lab.b.toFixed(0) }}</code>
+                  <span [class.muted]="cell.glare" [title]="cell.glare ? 'Almost every pixel looks like glare (bright, unsaturated): a white sticker, or a cell drowned in glare. All pixels were used.' : ''">
+                    cov {{ (cell.coverage * 100).toFixed(0) }}%{{ cell.glare ? ' · all bright, unfiltered' : '' }}
+                  </span>
+                  @if (cell.predicted) {
+                    <span>→ {{ cell.predicted.face }} ({{ cell.predicted.confidence.toFixed(2) }})</span>
+                  }
+                  @if (cell.expected) {
+                    <span class="muted">expected {{ cell.expected }}</span>
+                  }
+                </div>
+              }
+            </div>
+            @if (c.note) {
+              <small class="muted">{{ c.note }}</small>
+            }
+          } @else {
+            <div class="empty">no grid</div>
+          }
+        </figure>
+      </section>
+    } @else {
+      <p class="hint">Upload a photo of one cube face, or run the test set and open a result.</p>
+    }
+
+    <section class="card">
+      <h2>Test set <span class="muted">src/assets/test-scans/</span></h2>
+      <div class="buttons">
+        <button type="button" (click)="runTestSet()" [disabled]="cvState() !== 'ready'">Run test set</button>
+        @if (report()) {
+          <button type="button" (click)="exportReport()">Export JSON</button>
+        }
+        @if (evalProgress()) {
+          <span class="muted">{{ evalProgress() }}</span>
+        }
+      </div>
+      @if (report(); as rep) {
+        <p>
+          Grid detection: <b>{{ rep.gridsFound }}/{{ rep.photos }} ({{ percent(rep.detectionRate) }})</b> ·
+          Sticker accuracy when found: <b>{{ percent(rep.accuracyWhenFound) }}</b>
+          ({{ rep.stickersCorrect }}/{{ rep.stickersClassified }}) · Overall:
+          <b>{{ percent(rep.accuracyOverall) }}</b>
+        </p>
+        <table class="confusion">
+          <caption>Confusion matrix (rows expected, columns predicted)</caption>
+          <tr>
+            <th scope="col">exp \ pred</th>
+            @for (p of faces; track p) {
+              <th [style.background]="faceColors[p]">{{ p }}</th>
+            }
+          </tr>
+          @for (e of faces; track e) {
+            <tr>
+              <th [style.background]="faceColors[e]">{{ e }}</th>
+              @for (p of faces; track p) {
+                <td [class.diag]="e === p" [class.off]="e !== p && rep.confusion[e][p] > 0">
+                  {{ rep.confusion[e][p] || '' }}
+                </td>
+              }
+            </tr>
+          }
+        </table>
+        @if (rep.failures.length) {
+          <h3>Failures</h3>
+          <ul class="failures">
+            @for (f of rep.failures; track f.name) {
+              <li>
+                <button type="button" class="link" (click)="openTestPhoto(f.name)">{{ f.name }}</button>
+                {{ f.reason }}
+              </li>
+            }
+          </ul>
+        }
+      }
+    </section>
+
+    <section class="card">
+      <h2>Labels from a scramble</h2>
+      <p class="muted">
+        Scramble a solved cube (yellow U, green F) with these moves, photograph each face in kociemba
+        orientation (U: B at top · D: F at top · R F L B: U at top), and save the photos as
+        <code>{{ labelPrefix() }}-U.jpg</code> … next to the downloaded labels.
+      </p>
+      <div class="row wide">
+        <input
+          type="text"
+          aria-label="Scramble"
+          placeholder="R U R' U' F2 …"
+          [value]="scramble()"
+          (input)="scramble.set($any($event.target).value)"
+        />
+        <input
+          type="text"
+          class="prefix"
+          aria-label="File name prefix"
+          title="File name prefix"
+          [value]="labelPrefix()"
+          (input)="labelPrefix.set($any($event.target).value)"
+        />
+        <button type="button" (click)="downloadLabels()" [disabled]="!generated().labels">Download 6 labels</button>
+      </div>
+      @if (generated().error; as err) {
+        <p class="error">{{ err }}</p>
+      }
+      @if (generated().labels; as labels) {
+        <div class="faces">
+          @for (l of labels; track l.face) {
+            <div>
+              <div class="mini">
+                @for (s of l.stickers; track $index) {
+                  <span [style.background]="faceColors[s]" [title]="s"></span>
+                }
+              </div>
+              <small>{{ l.face }}</small>
+            </div>
+          }
+        </div>
+        <small class="muted">Add to index.json:</small>
+        <pre>{{ indexEntries() }}</pre>
+      }
+    </section>
+  </main>
+</div>

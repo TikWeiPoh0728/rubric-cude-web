@@ -1,0 +1,26 @@
+<header>
+  <h1>VeryCube</h1>
+  <p>very cube, very cute</p>
+</header>
+
+<main>
+  <section class="panel cube">
+    <app-cube-3d />
+
+    <div class="action-slot">
+      @if (session.canEdit()) {
+        <app-ui-element class="action" label="Edit" (click)="session.edit()" />
+      } @else if (session.canSave()) {
+        <app-ui-element class="action" label="Save" (click)="session.save()" />
+      }
+    </div>
+  </section>
+
+  <app-information />
+</main>
+
+@if (session.isSolved()) {
+  <app-progress />
+}
+
+<app-solve-dialog />

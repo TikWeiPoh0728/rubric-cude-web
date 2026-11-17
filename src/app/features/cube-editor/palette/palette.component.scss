@@ -1,0 +1,8 @@
+:host { display: block; }
+.palette { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatch {
+  width: 44px; height: 44px; border-radius: 10px; border: 3px solid #1e293b; cursor: pointer; padding: 0;
+}
+.swatch.active { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.swatch.unavailable { background-image: repeating-linear-gradient(45deg, rgba(120,120,120,.55) 0 6px, transparent 6px 12px); opacity: .45; filter: grayscale(1); }
+.hint { margin: 8px 0 0; font-size: 13px; color: #475569; }

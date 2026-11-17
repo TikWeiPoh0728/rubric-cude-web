@@ -1,0 +1,54 @@
+<div class="head">
+  <span class="left">
+    <!-- The video control: plays the solution by itself, and stops it where it is. -->
+    <app-ui-element
+      class="play"
+      size="sm"
+      [label]="playback.playing() ? 'Stop' : 'Play'"
+      [icon]="playback.playing() ? 'stop' : 'play'"
+      [color]="playback.playing() ? 'red' : 'green'"
+      [disabled]="playback.total() === 0"
+      (click)="playback.toggle()"
+    />
+    <span class="label">Progress</span>
+  </span>
+  <span class="now">
+    @if (playback.currentStage(); as stage) {
+      <app-ui-element class="stage-now" kind="label" size="xs" shape="pill" variant="soft" [color]="stageColor(stage.id)" [label]="stage.label" />
+    }
+    <span class="value">Step {{ playback.step() }} / {{ playback.total() }}</span>
+  </span>
+</div>
+
+<input
+  type="range"
+  min="0"
+  step="1"
+  [max]="playback.total()"
+  [value]="playback.step()"
+  [disabled]="playback.total() === 0"
+  aria-label="Solution progress"
+  (input)="onInput($event)"
+/>
+
+<div class="ticks" aria-hidden="true">
+  @for (t of ticks(); track t) {
+    <span class="tick" [class.major]="isMajor(t)"></span>
+  }
+</div>
+
+<!-- For a staged solution: how long each stage is, lined up with the scale above. -->
+@if (playback.stageRanges(); as stages) {
+  <div class="bands" aria-hidden="true">
+    @for (s of stages; track s.id) {
+      <span
+        class="band"
+        [style]="stageVars(s.id)"
+        [style.flex-grow]="s.count"
+        [class.skipped]="s.count === 0"
+        [class.active]="s.id === playback.currentStage()?.id"
+      >{{ s.label }}</span>
+    }
+  </div>
+}
+<div class="ends" aria-hidden="true"><span>0</span><span>{{ playback.total() }}</span></div>

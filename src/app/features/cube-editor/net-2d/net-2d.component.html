@@ -1,0 +1,19 @@
+<div class="net" role="group" aria-label="Unfolded cube">
+  @for (c of cells; track c.index) {
+    <button
+      type="button"
+      class="cell"
+      [class.center]="c.center"
+      [class.error]="state.errorStickers().has(c.index)"
+      [class.selected]="state.selected() === c.index"
+      [class.hover]="state.hovered() === c.index"
+      [style.grid-column]="c.gridColumn"
+      [style.grid-row]="c.gridRow"
+      [style.background-color]="colorOf(c.index)"
+      [attr.aria-label]="c.label"
+      (click)="state.clickSticker(c.index)"
+      (pointerenter)="state.setHovered(c.index)"
+      (pointerleave)="state.setHovered(null)"
+    ></button>
+  }
+</div>

@@ -1,0 +1,65 @@
+@use './tokens' as t;
+
+// The element takes its size from its content; `block` makes it fill the parent instead.
+:host { display: inline-block; max-width: 100%; }
+:host(.block) { display: block; }
+
+.ui {
+  display: inline-flex; align-items: center; justify-content: center; gap: t.$gap-icon;
+  width: 100%; margin: 0; border: 1px solid transparent;
+  font-family: t.$font-family; font-weight: t.$weight-strong; line-height: 1.2;
+  font-variant-numeric: tabular-nums; text-align: center; white-space: nowrap;
+  cursor: default;
+
+  // One look for every disabled element, whatever its color or variant.
+  &:disabled {
+    background: t.$disabled-bg; border-color: t.$disabled-border; color: t.$disabled-text;
+  }
+}
+button.ui {
+  cursor: pointer;
+  &:disabled { cursor: not-allowed; }
+  &:focus-visible { outline: 3px solid var(--ui-border); outline-offset: 2px; }
+}
+
+// ---- Variants ----------------------------------------------------------------------------
+.ui--solid { background: var(--ui-main); border-color: var(--ui-main); color: #fff; }
+button.ui--solid:hover:not(:disabled) { background: var(--ui-dark); border-color: var(--ui-dark); }
+
+.ui--soft { background: var(--ui-soft); color: var(--ui-soft-text); }
+button.ui--soft:hover:not(:disabled) { filter: brightness(0.96); }
+
+.ui--outline { background: #fff; border-color: var(--ui-border); color: var(--ui-soft-text); }
+button.ui--outline:hover:not(:disabled) { background: var(--ui-soft); }
+
+// A picked element (the chosen method) keeps its color even when it is disabled.
+button.ui--selected:disabled {
+  background: var(--ui-main); border-color: var(--ui-main); color: #fff; cursor: not-allowed;
+}
+
+// ---- Sizes -------------------------------------------------------------------------------
+.ui--xs { font-size: 13px; padding: 2px 10px; border-radius: t.$radius-sm; }
+.ui--sm { font-size: 14px; padding: 6px 11px; border-radius: t.$radius-md; }
+.ui--md { font-size: 16px; padding: 10px 24px; border-radius: t.$radius-lg; }
+.ui--lg { font-size: 18px; padding: 14px 24px; border-radius: t.$radius-lg; font-weight: t.$weight-bold; }
+
+// ---- Shape -------------------------------------------------------------------------------
+.ui--pill { border-radius: t.$radius-pill; }
+
+// ---- Icons -------------------------------------------------------------------------------
+.icon {
+  flex: none; width: 1.15em; height: 1.15em;
+  fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+
+  &--fill { fill: currentColor; stroke: none; }
+}
+
+// An icon button is square (round with the pill shape): equal space on every side.
+.ui--icon-only {
+  width: auto; aspect-ratio: 1;
+  &.ui--xs { padding: 3px; }
+  &.ui--sm { padding: 7px; }
+  &.ui--md { padding: 10px; }
+  &.ui--lg { padding: 14px; }
+}
+:host(.block) .ui--icon-only { width: auto; }
